@@ -6,23 +6,56 @@ A Spotify-inspired home and library experience built for the F26 ProductSC Devel
 
 ## Run locally
 
-Requires Node.js 22+ and pnpm 11+ (or npm). No API keys, accounts, database, or environment variables are needed for the app.
+Requires **Node.js 22+ and npm**. No API keys, accounts, database, or environment variables are needed for the app. Check your installation with `node --version` and `npm --version` in a terminal. If either command is unavailable, install Node.js with npm and reopen the terminal.
+
+Download or clone the project first. The examples below assume its folder is named `F26 ProductSC Developer Challenge` and is on your Desktop; adjust the path to match where you saved it.
+
+### macOS
+
+Open **Terminal** and run:
 
 ```sh
-pnpm install
-pnpm dev
+cd "$HOME/Desktop/F26 ProductSC Developer Challenge"
+npm install
+npm run dev
 ```
 
-Open the local address printed by Vite. Alternatively, `npm install` and `npm run dev` work; the committed dependency lockfile is for pnpm.
+### Windows
+
+Open **PowerShell** and run:
+
+```powershell
+cd "$HOME\Desktop\F26 ProductSC Developer Challenge"
+npm install
+npm run dev
+```
+
+If your Desktop is inside OneDrive or the folder has a different name, use its actual path. If PowerShell blocks `npm.ps1`, use `npm.cmd install` and `npm.cmd run dev` instead.
+
+### Open, stop, and restart the app
+
+Open the **Local** address printed in the terminal, usually `http://localhost:5173`. If that port is already in use, Vite may print a different port. Keep the terminal running while using the app. This starts a local development server on your computer; it does not publish the project to a public hosting service.
+
+To stop it, focus the terminal running the server and press **Ctrl+C**. On Mac, this means **Control+C**, not Command+C. If Windows asks whether to terminate the batch job, enter `Y`. Closing only the browser tab does not stop the server. Stopping it leaves your project files intact.
+
+To restart, open a terminal in the project folder and run `npm run dev`. You generally only need `npm install` on first setup or after dependencies change. When transferring the project between Mac and Windows, install dependencies on the destination computer rather than copying `node_modules`.
+
+If a coding assistant started the preview through a chat, it may be running in an assistant-managed terminal session rather than a Terminal window you opened. Ask the assistant in that chat to **stop the local preview server**. The Ctrl+C instructions above apply to a server you started in your own terminal. A preview being available now does not mean it will start automatically after a restart or on another computer.
+
+### Checks and production preview
+
+These commands work on both Mac and Windows:
 
 ```sh
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm preview
+npm run typecheck
+npm test
+npm run build
+npm run preview
 ```
 
-The production app is in `dist/`. A future static host must rewrite application routes to `index.html`; audio and artwork are ordinary static files.
+`npm run build` writes the production app to `dist/`. `npm run preview` starts another local server for that build; open the address it prints and stop it with **Ctrl+C** as well. A future static host must rewrite application routes to `index.html`; audio and artwork are ordinary static files.
+
+The repository includes a pnpm lockfile. If you use **pnpm 11+**, run `pnpm install --frozen-lockfile` to install the locked dependencies, then `pnpm dev`. The other equivalents are `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm preview`. npm is supported, but it does not use the pnpm lockfile. Choose one package manager for your checkout.
 
 ## Demo walkthrough
 
@@ -66,17 +99,17 @@ The existing loading, retry, empty, and missing-resource views are already prese
 
 ## Validation
 
-`pnpm test` runs Vitest checks for catalog integrity, song metadata and owning playlist resolution, search, missing songs/playlists, persistence, unavailable/corrupt storage, shuffle preservation/restoration, every repeat mode, upcoming order, circular boundaries, and empty/single-track queues.
+`npm test` runs Vitest checks for catalog integrity, song metadata and owning playlist resolution, search, missing songs/playlists, persistence, unavailable/corrupt storage, shuffle preservation/restoration, every repeat mode, upcoming order, circular boundaries, and empty/single-track queues.
 
 ```sh
-pnpm exec playwright install chromium
-pnpm test:e2e
+npx playwright install chromium
+npm run test:e2e
 ```
 
 To use an existing Chrome installation instead, set `CHROME_PATH` to its executable. On macOS:
 
 ```sh
-CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" pnpm test:e2e
+CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm run test:e2e
 ```
 
 Browser tests cover actual media progress, pause/resume, seeking, manual/automatic repeat, one-song replay, stable shuffle, queue selection, playlist-source identity, panel route/scroll continuity, release-row reveal, expanded-view route/scroll/focus restoration, live lyrics, saved profiles, duplicate queue additions, recents, menu keyboard behavior, synchronized settings, failed-media retry, direct URLs, search suggestions/history/filters, Home facet history and uninterrupted playback, sidebar search/sort/layouts and expand/minimize focus, and keyboard-only playback. Layout checks capture Home, the profile menu, and Now Playing at 1440px, 1024px, 760px, and 390px, with no horizontal page overflow.
