@@ -5,6 +5,15 @@ export interface Track {
   duration: number;
   artwork: string;
   audioUrl: string;
+  description: string;
+  lyrics: string | null;
+  releaseId: string;
+  artistId: string;
+}
+export interface Release extends Playlist {
+  artist: string;
+  artistId: string;
+  year: number;
 }
 export interface Playlist {
   id: string;
@@ -17,9 +26,18 @@ export interface Playlist {
 }
 export interface Catalog {
   listPlaylists(): Promise<Playlist[]>;
+  listTracks(): Promise<Track[]>;
+  getRelease(
+    id: string,
+  ): Promise<{ playlist: Release; tracks: Track[] } | null>;
   getPlaylist(
     id: string,
   ): Promise<{ playlist: Playlist; tracks: Track[] } | null>;
+  getTrack(id: string): Promise<{
+    track: Track;
+    playlist: Playlist;
+    tracks: Track[];
+  } | null>;
   search(query: string): Promise<{ playlists: Playlist[]; tracks: Track[] }>;
 }
 export interface Library {
@@ -51,6 +69,28 @@ const titles = [
   "Good days ahead",
 ];
 const ids = ["morning", "midnight", "focus", "good-days"];
+const trackDescriptions = [
+  [
+    "Warm, gently layered keys welcome the day, with a soft bass pulse and bright notes drifting overhead. A small moment of calm before everything begins.",
+    "An unhurried keyboard motif opens a little further with every phrase. Rounded bass and delicate percussion give this miniature its quietly hopeful rhythm.",
+    "Light arpeggios fall across mellow chords like sunlight through an open window. Made for slow coffee, a good book, and nowhere you need to be.",
+  ],
+  [
+    "Low keys and a steady pulse trace a path through the late-night city. Small melodic reflections float above the rhythm, leaving room for your thoughts.",
+    "A shimmering keyboard pattern and hushed percussion catch the feeling of streetlights reflected on wet pavement. Let the repeating phrases carry you along.",
+    "Soft bass anchors a wandering melody as the city settles down. A gentle, rhythmic companion for the final stretch of the journey home.",
+  ],
+  [
+    "Spacious chords and a floating arpeggio create a light, open sound. With no percussion to interrupt it, the melody gives you space to settle into your work.",
+    "Quiet keyboard layers ripple over a low, sustained foundation. An understated instrumental for clearing your head and finding a comfortable pace.",
+    "A delicate sequence of notes moves through warm, slow-changing harmonies. Designed to sit gently in the background while you get lost in what matters.",
+  ],
+  [
+    "Bright keys, an easy bass line, and a relaxed beat bring a little late-afternoon warmth. A sunny instrumental for making an ordinary moment feel good.",
+    "A rolling arpeggio meets soft percussion and open, easygoing chords. Imagine the road beside the water, the windows down, and time to take the scenic route.",
+    "An uplifting keyboard melody wanders over a familiar, steady groove. A little reminder that the journey can be just as enjoyable as arriving.",
+  ],
+];
 const tracks: Track[] = names.flatMap((group, i) =>
   group.map((title, j) => ({
     id: `${ids[i]}-${j + 1}`,
@@ -59,6 +99,10 @@ const tracks: Track[] = names.flatMap((group, i) =>
     duration: 32,
     artwork: `/art/${ids[i]}.svg`,
     audioUrl: `/audio/${ids[i]}-${j + 1}.wav`,
+    description: trackDescriptions[i][j],
+    lyrics: null,
+    releaseId: `${ids[i]}-sessions`,
+    artistId: ids[i],
   })),
 );
 const playlists: Playlist[] = ids.map((id, i) => ({
@@ -70,7 +114,29 @@ const playlists: Playlist[] = ids.map((id, i) => ({
   tag: ["SLOW STARTS", "AFTER DARK", "IN THE ZONE", "FEEL-GOOD FINDS"][i],
   trackIds: tracks.slice(i * 3, i * 3 + 3).map((t) => t.id),
 }));
+const releases: Release[] = playlists.map((p, i) => ({
+  ...p,
+  id: `${p.id}-sessions`,
+  title: [
+    "Morning sketches",
+    "After-hours sketches",
+    "Quiet studies",
+    "Sunlit sketches",
+  ][i],
+  artist: artists[i],
+  artistId: ids[i],
+  year: 2026,
+}));
 export const catalog: Catalog = {
+  async getRelease(id) {
+    const playlist = releases.find((r) => r.id === id);
+    return playlist
+      ? { playlist, tracks: tracks.filter((t) => t.releaseId === id) }
+      : null;
+  },
+  async listTracks() {
+    return tracks;
+  },
   async listPlaylists() {
     return playlists;
   },
@@ -84,6 +150,18 @@ export const catalog: Catalog = {
           ),
         }
       : null;
+  },
+  async getTrack(id) {
+    const track = tracks.find((item) => item.id === id);
+    const playlist = playlists.find((item) => item.trackIds.includes(id));
+    if (!track || !playlist) return null;
+    return {
+      track,
+      playlist,
+      tracks: playlist.trackIds.map((trackId) =>
+        tracks.find((item) => item.id === trackId)!,
+      ),
+    };
   },
   async search(query) {
     const q = query.trim().toLocaleLowerCase();
@@ -136,6 +214,6 @@ try {
 }
 export const library = createLibrary(storage);
 export function queueIndex(index: number, direction: number, length: number) {
-  const next = index + direction;
-  return next >= 0 && next < length ? next : null;
+  if (length <= 0) return null;
+  return (((index + direction) % length) + length) % length;
 }
