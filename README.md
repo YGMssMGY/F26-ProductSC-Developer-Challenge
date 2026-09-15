@@ -79,6 +79,8 @@ Open the preview address with `/F26-ProductSC-Developer-Challenge/` appended, no
 
 The Pages build uses hash routes, for example `/F26-ProductSC-Developer-Challenge/#/playlist/morning`, so direct links and refreshes work without server rewrite rules. Audio, artwork, scripts, and the original headphones favicon all use the repository base path. The usual `npm run dev` and `npm run build` keep root-based browser routes. If you rename the repository, update the Pages base in `vite.config.ts`, the production test configuration and expectations, and these URLs. A custom domain would need its own base-path configuration.
 
+The favicon includes 16px/32px PNG files, a multi-size ICO fallback, and a 180px Apple touch icon, all generated from `public/favicon.svg`. Versioned icon URLs help browsers refresh previously cached icons. If an older icon remains after a successful deployment, close and reopen the site tab. Local file changes do not update the published site until they are committed, pushed, and deployed.
+
 Implementation references: [Vite’s GitHub Pages guide](https://vite.dev/guide/static-deploy#github-pages) and [React Router’s HashRouter](https://reactrouter.com/api/declarative-routers/HashRouter).
 
 ## Demo walkthrough

@@ -116,12 +116,51 @@ test("Pages serves its favicon and static assets without depending on SPA fallba
   request,
 }) => {
   await page.goto("./");
-  const icon = page.locator('link[rel="icon"]');
-  await expect(icon).toHaveAttribute("href", `${projectPath}favicon.svg`);
-  const response = await request.get(`${projectPath}favicon.svg`);
-  expect(response.ok()).toBe(true);
-  expect(response.headers()["content-type"]).toContain("image/svg+xml");
-  expect(await response.text()).toContain("The Listening Room");
+  const icons = [
+    {
+      selector: 'link[rel="icon"][type="image/x-icon"]',
+      file: "favicon.ico",
+      type: /image\/(x-icon|vnd.microsoft.icon)/,
+    },
+    {
+      selector: 'link[rel="icon"][sizes="16x16"]',
+      file: "favicon-16x16.png",
+      type: /image\/png/,
+    },
+    {
+      selector: 'link[rel="icon"][sizes="32x32"]',
+      file: "favicon-32x32.png",
+      type: /image\/png/,
+    },
+    {
+      selector: 'link[rel="apple-touch-icon"]',
+      file: "apple-touch-icon.png",
+      type: /image\/png/,
+    },
+  ];
+  for (const icon of icons) {
+    await expect(page.locator(icon.selector)).toHaveAttribute(
+      "href",
+      `${projectPath}${icon.file}?v=2`,
+    );
+    const response = await request.get(`${projectPath}${icon.file}?v=2`);
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toMatch(icon.type);
+    const bytes = await response.body();
+    if (icon.file.endsWith(".png")) {
+      expect(bytes.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+      const size = icon.file.includes("16x16")
+        ? 16
+        : icon.file.includes("32x32")
+          ? 32
+          : 180;
+      expect(bytes.readUInt32BE(16)).toBe(size);
+      expect(bytes.readUInt32BE(20)).toBe(size);
+    } else {
+      expect(bytes.readUInt16LE(2)).toBe(1);
+      expect(bytes.readUInt16LE(4)).toBe(3);
+    }
+  }
   await expect
     .poll(() =>
       page

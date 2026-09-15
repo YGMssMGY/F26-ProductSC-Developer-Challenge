@@ -28,3 +28,5 @@ No proprietary application source code or scraped artwork is included.
 ## Favicon
 
 `public/favicon.svg` is an original geometric headphones icon drawn for The Listening Room, using a green tile and dark headphones. It is dedicated to CC0 1.0 Universal alongside the original project artwork. It does not use Spotify’s logo.
+
+The PNG favicons, multi-size `favicon.ico`, and `apple-touch-icon.png` are rendered from that same SVG by `scripts/generate_favicons.mjs` and use the same CC0 dedication. To regenerate them, install the Playwright browser and run `node scripts/generate_favicons.mjs` (or set `CHROME_PATH` to an installed Chrome executable).
