@@ -2,6 +2,7 @@ import React, { useCallback, useLayoutEffect } from "react";
 import { createRoot } from "react-dom/client";
 import {
   BrowserRouter,
+  HashRouter,
   Link,
   NavLink,
   Route,
@@ -730,7 +731,14 @@ function Shell() {
     <>
       <RouteScrollReset />
       <AutoOpenPlayer />
-      <a className="skip-link" href="#main-content">
+      <a
+        className="skip-link"
+        href="#main-content"
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById("main-content")?.focus();
+        }}
+      >
         Skip to content
       </a>
       <Header />
@@ -795,9 +803,12 @@ function Shell() {
     </>
   );
 }
+const AppRouter =
+  import.meta.env.MODE === "github-pages" ? HashRouter : BrowserRouter;
+
 function App() {
   return (
-    <BrowserRouter>
+    <AppRouter>
       <LibraryProvider>
         <ViewProvider>
           <PlayerProvider>
@@ -805,7 +816,7 @@ function App() {
           </PlayerProvider>
         </ViewProvider>
       </LibraryProvider>
-    </BrowserRouter>
+    </AppRouter>
   );
 }
 createRoot(document.getElementById("root")!).render(

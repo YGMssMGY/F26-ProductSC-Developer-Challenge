@@ -57,6 +57,30 @@ npm run preview
 
 The repository includes a pnpm lockfile. If you use **pnpm 11+**, run `pnpm install --frozen-lockfile` to install the locked dependencies, then `pnpm dev`. The other equivalents are `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm preview`. npm is supported, but it does not use the pnpm lockfile. Choose one package manager for your checkout.
 
+## Publish on GitHub Pages
+
+The deployment workflow is configured for the repository `YGMssMGY/F26-ProductSC-Developer-Challenge`. Publishing still requires pushing these changes and enabling Pages on GitHub:
+
+1. In GitHub Desktop, review and commit the changes, then **Push origin** to `main`.
+2. In the GitHub repository, open **Settings → Pages → Build and deployment**, and choose **GitHub Actions** as the source.
+3. Under **Actions**, open **Deploy Listening Room to GitHub Pages**. If the first run happened before Pages was enabled, run it again using **Run workflow**.
+4. After the workflow succeeds, open `https://ygmssmgy.github.io/F26-ProductSC-Developer-Challenge/`.
+
+The workflow uses Node.js 24 and pnpm 11, installs the committed lockfile, runs unit tests, type-checks/builds the app, and verifies the production routes and media in Chromium before publishing `dist/`. Later pushes to `main` deploy automatically. GitHub hosts the published app; your Mac does not need to keep running.
+
+To check the same build locally on Mac or Windows:
+
+```sh
+npm run build:pages
+npm run preview:pages
+```
+
+Open the preview address with `/F26-ProductSC-Developer-Challenge/` appended, normally `http://127.0.0.1:4173/F26-ProductSC-Developer-Challenge/`. Stop this preview with **Ctrl+C**. For automated production checks after building, run `npm run test:e2e:pages` (install the Playwright browser as described below first).
+
+The Pages build uses hash routes, for example `/F26-ProductSC-Developer-Challenge/#/playlist/morning`, so direct links and refreshes work without server rewrite rules. Audio, artwork, scripts, and the original headphones favicon all use the repository base path. The usual `npm run dev` and `npm run build` keep root-based browser routes. If you rename the repository, update the Pages base in `vite.config.ts`, the production test configuration and expectations, and these URLs. A custom domain would need its own base-path configuration.
+
+Implementation references: [Vite’s GitHub Pages guide](https://vite.dev/guide/static-deploy#github-pages) and [React Router’s HashRouter](https://reactrouter.com/api/declarative-routers/HashRouter).
+
 ## Demo walkthrough
 
 1. On Home, **All**, **Music**, and **Your playlists** filter the feed in place. All three chips stay visible and show the selected filter. Saved-only results include an empty state; the URL remembers the filter for refresh and Back/Forward. Open **A softer morning** by clicking its artwork or title. The separate green play buttons start music without navigating.
@@ -116,7 +140,7 @@ Browser tests cover actual media progress, pause/resume, seeking, manual/automat
 
 Automated browser runs use Chromium's `--disable-audio-output` test option: the real WAV files are decoded and their media timelines advance, while the OS audio stream is replaced by a test stream. This avoids host audio-device interruptions in headless runs; it does not change the app. [Chromium's description of the test option](https://chromium.googlesource.com/chromium/src/+/f29eb01290cd36a30177ecf8197f906c01088a0d). Set `E2E_REAL_AUDIO=1` to use physical audio output when verifying on a suitable device.
 
-The interface and playback update is checked with fifteen unit tests, seventeen browser tests, a type check, and a production build. Desktop, tablet, and mobile screenshots are included for visual review.
+The interface and playback update is checked with fifteen unit tests, seventeen development browser tests plus three Pages production tests, a type check, and a production build. Desktop, tablet, and mobile screenshots are included for visual review.
 
 Before submission, run the type check, production build, unit tests, and browser tests, then inspect desktop and mobile layouts. Browser tests verify decoded audio playback and time advancement; a final human listening check on the submitting device is recommended for speaker volume and subjective sound quality.
 
@@ -138,4 +162,4 @@ Screenshots: [library sidebar](docs/library-sidebar.png), [expanded library](doc
 - [ ] Email its link to `saniagup@usc.edu`, `avshah@usc.edu`, and `kakolla@usc.edu`
 - [ ] Use subject `[NAME] - ProductSC Dev Challenge`; deadline in the brief: Wednesday, September 16 at 12 PM (timezone unspecified)
 
-This is an independent student assessment project, not an official Spotify product. Deployment, authentication, backend implementation, publication, and email submission are outside this implementation.
+This is an independent student assessment project, not an official Spotify product. GitHub Pages deployment configuration is included. Authentication, backend implementation, and email submission remain outside this implementation; publishing requires the GitHub steps above.

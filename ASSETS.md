@@ -24,3 +24,7 @@ Regeneration is optional; all assets are committed. To regenerate, install NumPy
 - **DM Sans and Manrope:** optional fonts delivered through Google Fonts, licensed under the SIL Open Font License. Sources: https://fonts.google.com/specimen/DM+Sans and https://fonts.google.com/specimen/Manrope . System sans-serif fonts are used if the network is unavailable.
 
 No proprietary application source code or scraped artwork is included.
+
+## Favicon
+
+`public/favicon.svg` is an original geometric headphones icon drawn for The Listening Room, using a green tile and dark headphones. It is dedicated to CC0 1.0 Universal alongside the original project artwork. It does not use Spotify’s logo.
