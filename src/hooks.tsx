@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
 } from "react";
 import type { ReactNode } from "react";
 import { library } from "./data";
@@ -30,17 +31,46 @@ export function useAsync<T>(load: () => Promise<T>) {
 }
 const LibraryContext = createContext<{
   saved: string[];
+  liked: string[];
+  toggleTrack: (id: string) => void;
   toggle: (id: string) => void;
   error: string;
-}>({ saved: [], toggle: () => {}, error: "" });
+}>({
+  saved: [],
+  liked: [],
+  toggleTrack: () => {},
+  toggle: () => {},
+  error: "",
+});
 export function LibraryProvider({ children }: { children: ReactNode }) {
   const [saved, setSaved] = useState<string[]>([]);
+  const [liked, setLiked] = useState<string[]>([]);
+  const [trackError, setTrackError] = useState("");
+  const trackOperations = useRef(Promise.resolve());
   const [error, setError] = useState("");
   useEffect(() => {
     library
       .getSavedPlaylistIds()
       .then(setSaved)
       .catch(() => setError("Your library could not be loaded."));
+  }, []);
+  useEffect(() => {
+    library
+      .getSavedTrackIds()
+      .then(setLiked)
+      .catch(() => setTrackError("Your saved songs could not be loaded."));
+  }, []);
+  const toggleTrack = useCallback((id: string) => {
+    // Serialize clicks so rapid toggles always use the latest saved collection.
+    trackOperations.current = trackOperations.current
+      .then(async () => {
+        setTrackError("");
+        const current = await library.getSavedTrackIds();
+        setLiked(await library.setTrackSaved(id, !current.includes(id)));
+      })
+      .catch(() =>
+        setTrackError("Could not save this song. Please try again."),
+      );
   }, []);
   const toggle = useCallback(
     (id: string) => {
@@ -54,8 +84,16 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     [saved],
   );
   return (
-    <LibraryContext.Provider value={{ saved, toggle, error }}>
+    <LibraryContext.Provider
+      value={{ saved, liked, toggleTrack, toggle, error }}
+    >
       {children}
+      {trackError && (
+        <div className="library-save-error" role="alert">
+          {trackError}
+          <button onClick={() => setTrackError("")}>Dismiss</button>
+        </div>
+      )}
     </LibraryContext.Provider>
   );
 }

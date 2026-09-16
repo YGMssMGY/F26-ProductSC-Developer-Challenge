@@ -12,6 +12,7 @@ import {
 import { usePlayer, Transport, Volume, time } from "./player";
 import { useView } from "./view-state";
 import { upcomingIndices } from "./queue";
+import { SaveTrack } from "./save-track";
 import { TrackMenu } from "./track-menu";
 export function AutoOpenPlayer() {
   const p = usePlayer();
@@ -116,6 +117,7 @@ export function NowPlayingView({ panel = false }: { panel?: boolean }) {
             {t.artist}
           </Link>
         </div>
+        <SaveTrack track={t} />
         <TrackMenu track={t} />
       </div>
       {!panel && (

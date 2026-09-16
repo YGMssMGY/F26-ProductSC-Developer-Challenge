@@ -183,3 +183,36 @@ test("Pages serves its favicon and static assets without depending on SPA fallba
   await page.goto("./favicon.svg");
   await page.screenshot({ path: "docs/favicon-preview.png" });
 });
+
+test("Pages Liked Songs deep link retains saved songs after reload", async ({
+  page,
+}) => {
+  await page.goto("./#/track/morning-1");
+  await page
+    .locator("main")
+    .getByRole("button", { name: "Save First Light to Liked Songs" })
+    .click();
+  await page
+    .getByRole("link", { name: "Liked Songs, 1 song", exact: true })
+    .click();
+  await expect(page).toHaveURL(/#\/collection\/tracks$/);
+  await page.reload();
+  await expect(page.locator(".track-row")).toHaveCount(1);
+  await page
+    .getByRole("button", { name: "Play Liked Songs", exact: true })
+    .click();
+  await expect
+    .poll(() =>
+      page
+        .locator("audio")
+        .evaluate(
+          (audio: HTMLAudioElement) => !audio.paused && audio.currentTime > 0,
+        ),
+    )
+    .toBe(true);
+  await expect(page.locator("audio")).toHaveAttribute(
+    "src",
+    `${projectPath}audio/morning-1.wav`,
+  );
+  await page.screenshot({ path: "docs/liked-songs-1440.png" });
+});

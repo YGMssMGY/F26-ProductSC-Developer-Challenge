@@ -1,8 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { MoreHorizontal, ListPlus, Disc3, UserRound, Info } from "lucide-react";
+import {
+  MoreHorizontal,
+  ListPlus,
+  Disc3,
+  UserRound,
+  Info,
+  Heart,
+} from "lucide-react";
 import type { Track } from "./data";
+import { useLibrary } from "./hooks";
 import { usePlayer } from "./player";
 export function TrackMenu({ track }: { track: Track }) {
   const [position, setPosition] = useState<{
@@ -12,6 +20,8 @@ export function TrackMenu({ track }: { track: Track }) {
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   const player = usePlayer();
+  const { liked, toggleTrack } = useLibrary();
+  const saved = liked.includes(track.id);
   const close = (focus = true) => {
     setPosition(null);
     if (focus) trigger.current?.focus();
@@ -51,7 +61,7 @@ export function TrackMenu({ track }: { track: Track }) {
           const r = trigger.current!.getBoundingClientRect();
           setPosition({
             left: Math.max(8, Math.min(r.right - 228, window.innerWidth - 236)),
-            top: Math.max(8, Math.min(r.bottom + 6, window.innerHeight - 220)),
+            top: Math.max(8, Math.min(r.bottom + 6, window.innerHeight - 270)),
           });
         }}
       >
@@ -104,6 +114,16 @@ export function TrackMenu({ track }: { track: Track }) {
             >
               <ListPlus size={17} />
               Add to queue
+            </button>
+            <button
+              role="menuitem"
+              onClick={() => {
+                toggleTrack(track.id);
+                close();
+              }}
+            >
+              <Heart size={17} fill={saved ? "currentColor" : "none"} />
+              {saved ? "Remove from Liked Songs" : "Save to Liked Songs"}
             </button>
             <Link
               role="menuitem"

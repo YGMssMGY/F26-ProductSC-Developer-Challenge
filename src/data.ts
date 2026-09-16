@@ -42,6 +42,8 @@ export interface Catalog {
 }
 export interface Library {
   getSavedPlaylistIds(): Promise<string[]>;
+  getSavedTrackIds(): Promise<string[]>;
+  setTrackSaved(id: string, saved: boolean): Promise<string[]>;
   setSaved(id: string, saved: boolean): Promise<string[]>;
 }
 const names = [
@@ -190,9 +192,44 @@ export function createLibrary(
   } catch {
     /* Use session state if storage is unavailable. */
   }
+  let savedTracks: string[] = [];
+  try {
+    const value: unknown = JSON.parse(
+      storage?.getItem("listening-room.liked-tracks") ?? "[]",
+    );
+    if (Array.isArray(value))
+      savedTracks = [
+        ...new Set(
+          value.filter(
+            (id): id is string =>
+              typeof id === "string" && tracks.some((track) => track.id === id),
+          ),
+        ),
+      ];
+  } catch {
+    /* Keep song saving usable when storage is unavailable. */
+  }
   return {
     async getSavedPlaylistIds() {
       return [...saved];
+    },
+    async getSavedTrackIds() {
+      return [...savedTracks];
+    },
+    async setTrackSaved(id, on) {
+      if (!tracks.some((track) => track.id === id)) return [...savedTracks];
+      savedTracks = on
+        ? [...new Set([...savedTracks, id])]
+        : savedTracks.filter((item) => item !== id);
+      try {
+        storage?.setItem(
+          "listening-room.liked-tracks",
+          JSON.stringify(savedTracks),
+        );
+      } catch {
+        /* The in-memory collection still works. */
+      }
+      return [...savedTracks];
     },
     async setSaved(id, on) {
       if (!ids.includes(id)) return [...saved];

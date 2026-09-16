@@ -16,6 +16,7 @@ import {
   PanelRight,
   Mic2,
 } from "lucide-react";
+import { SaveTrack } from "./save-track";
 import { catalog } from "./data";
 import type { Track, Playlist } from "./data";
 import {
@@ -273,19 +274,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const playlistId =
     queue.source?.kind === "playlist" ? queue.source.id : ownerId;
   const collectionUrl =
-    track && queue.source?.kind === "search"
-      ? `/search?q=${encodeURIComponent(queue.source.id)}`
-      : track && queue.source?.kind === "catalog"
-        ? "/search"
-        : track && queue.source?.kind === "release"
-          ? `/release/${queue.source.id}?track=${track.id}`
-          : track && queue.source?.kind === "artist"
-            ? `/artist/${queue.source.id}`
-            : track && playlistId
-              ? `/playlist/${playlistId}?track=${track.id}`
-              : track
-                ? `/track/${track.id}`
-                : "/";
+    track && queue.source?.kind === "liked"
+      ? "/collection/tracks"
+      : track && queue.source?.kind === "search"
+        ? `/search?q=${encodeURIComponent(queue.source.id)}`
+        : track && queue.source?.kind === "catalog"
+          ? "/search"
+          : track && queue.source?.kind === "release"
+            ? `/release/${queue.source.id}?track=${track.id}`
+            : track && queue.source?.kind === "artist"
+              ? `/artist/${queue.source.id}`
+              : track && playlistId
+                ? `/playlist/${playlistId}?track=${track.id}`
+                : track
+                  ? `/track/${track.id}`
+                  : "/";
   const value: PlayerState = {
     track,
     playing,
@@ -485,6 +488,7 @@ export function PlayerBar() {
                 <span>{p.track.artist}</span>
               </Link>
             </div>
+            <SaveTrack track={p.track} />
           </>
         ) : (
           <>

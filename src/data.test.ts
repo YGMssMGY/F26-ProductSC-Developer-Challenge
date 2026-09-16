@@ -100,3 +100,68 @@ it("resolves each song to a distinct release domain", async () => {
   }
   expect(await catalog.getRelease("missing")).toBeNull();
 });
+
+describe("liked songs", () => {
+  it("persists songs independently of playlists, without duplicates or unknown IDs", async () => {
+    const values = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        values.set(key, value);
+      },
+    };
+    const library = createLibrary(storage);
+    await library.setSaved("morning", true);
+    await library.setTrackSaved("morning-1", true);
+    await library.setTrackSaved("morning-1", true);
+    await library.setTrackSaved("morning-2", true);
+    await library.setTrackSaved("missing", true);
+    expect(await createLibrary(storage).getSavedTrackIds()).toEqual([
+      "morning-1",
+      "morning-2",
+    ]);
+    await library.setTrackSaved("morning-1", false);
+    expect(await createLibrary(storage).getSavedTrackIds()).toEqual([
+      "morning-2",
+    ]);
+    expect(await createLibrary(storage).getSavedPlaylistIds()).toEqual([
+      "morning",
+    ]);
+    await library.setTrackSaved("morning-1", true);
+    expect(await library.getSavedTrackIds()).toEqual([
+      "morning-2",
+      "morning-1",
+    ]);
+  });
+  it("filters invalid stored values and keeps saving usable without storage", async () => {
+    const filtered = createLibrary({
+      getItem: () => JSON.stringify(["morning-1", "missing", 1, "morning-1"]),
+      setItem: () => {},
+    });
+    expect(await filtered.getSavedTrackIds()).toEqual(["morning-1"]);
+    for (const storage of [
+      undefined,
+      {
+        getItem: () => "{bad",
+        setItem: () => {
+          throw Error();
+        },
+      },
+      {
+        getItem: () => {
+          throw Error();
+        },
+        setItem: () => {
+          throw Error();
+        },
+      },
+    ]) {
+      const library = createLibrary(storage);
+      expect(await library.getSavedTrackIds()).toEqual([]);
+      expect(await library.setTrackSaved("morning-1", true)).toEqual([
+        "morning-1",
+      ]);
+      expect(await library.setTrackSaved("morning-1", false)).toEqual([]);
+    }
+  });
+});

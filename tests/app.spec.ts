@@ -926,3 +926,112 @@ test("Home filters and independent library controls fit tablet and phone layouts
   ).toBeVisible();
   await page.screenshot({ path: "docs/home-filters-390.png" });
 });
+
+test("song saves synchronize across controls, persist, and play as a collection", async ({
+  page,
+}) => {
+  await start(page);
+  await footer(page)
+    .getByRole("button", { name: "Save First Light to Liked Songs" })
+    .click();
+  await expect(
+    page
+      .locator("main")
+      .getByRole("button", { name: "Remove First Light from Liked Songs" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page
+      .getByRole("complementary", { name: "Now Playing panel" })
+      .getByRole("button", { name: "Remove First Light from Liked Songs" }),
+  ).toBeVisible();
+  await page
+    .locator("main")
+    .getByRole("button", { name: "More options for First Light" })
+    .click();
+  await page.getByRole("menuitem", { name: "Remove from Liked Songs" }).click();
+  await expect(
+    footer(page).getByRole("button", {
+      name: "Save First Light to Liked Songs",
+    }),
+  ).toHaveAttribute("aria-pressed", "false");
+  const save = page
+    .locator("main")
+    .getByRole("button", { name: "Save First Light to Liked Songs" });
+  await save.focus();
+  await page.keyboard.press("Enter");
+  await page
+    .locator("main")
+    .getByRole("button", { name: "Save Slow Bloom to Liked Songs" })
+    .click();
+  await page.getByRole("button", { name: "Close panel" }).click();
+  await page
+    .getByRole("link", { name: "Liked Songs, 2 songs", exact: true })
+    .click();
+  await expect(page).toHaveURL(/collection\/tracks$/);
+  await playing(page, "morning-1.wav");
+  await expect(page.locator(".track-row").first()).toContainText("Slow Bloom");
+  await page.reload();
+  await expect(page.locator(".track-row")).toHaveCount(2);
+  await paused(page);
+  await page
+    .getByRole("button", { name: "Play Liked Songs", exact: true })
+    .click();
+  await playing(page, "morning-2.wav");
+  await footer(page).getByRole("button", { name: "Next track" }).click();
+  await playing(page, "morning-1.wav");
+  await page
+    .locator("main")
+    .getByRole("button", { name: "Remove First Light from Liked Songs" })
+    .click();
+  await page
+    .locator("main")
+    .getByRole("button", { name: "Remove Slow Bloom from Liked Songs" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Songs you like belong here" }),
+  ).toBeVisible();
+  await playing(page, "morning-1.wav");
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Songs you like belong here" }),
+  ).toBeVisible();
+});
+
+test("mobile song saving and Liked Songs remain accessible", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/track/morning-1");
+  const save = page
+    .locator("main")
+    .getByRole("button", { name: "Save First Light to Liked Songs" });
+  await save.click();
+  await expect(
+    page
+      .locator("main")
+      .getByRole("button", { name: "Remove First Light from Liked Songs" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page
+    .getByRole("navigation", { name: "Mobile navigation" })
+    .getByRole("link", { name: "Library" })
+    .click();
+  await page
+    .locator("main")
+    .getByRole("link", { name: "Liked Songs, 1 song", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Play Liked Songs", exact: true })
+    .click();
+  await playing(page, "morning-1.wav");
+  await expect(
+    footer(page).getByRole("button", {
+      name: "Remove First Light from Liked Songs",
+    }),
+  ).toBeInViewport();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({ path: "docs/liked-songs-390.png" });
+});

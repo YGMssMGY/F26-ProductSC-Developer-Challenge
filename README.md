@@ -12,10 +12,10 @@ A Spotify-inspired music app built for the **F26 ProductSC Developer Challenge**
 - Playlist, release, artist, and song-detail pages.
 - Persistent player with seeking, volume, shuffle, repeat, and queue controls.
 - Expandable Now Playing and library views.
-- Saved playlists, listening history, and preferences stored locally.
+- Saved playlists and Liked Songs, listening history, and preferences stored locally.
 - Responsive layouts and keyboard-accessible controls.
 
-**Try it:** Open _A softer morning_ → play _First Light_ → browse while listening → save the playlist → find it in Your Library.
+**Try it:** Open _A softer morning_ → play _First Light_ → browse while listening → click the + beside a song → find it in Your Library → Liked Songs. Click the green check to remove it. Saves stay in this browser across refreshes.
 
 ## Run locally
 

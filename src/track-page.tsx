@@ -9,6 +9,7 @@ import {
   Play,
   Repeat2,
 } from "lucide-react";
+import { SaveTrack } from "./save-track";
 import { catalog } from "./data";
 import { useAsync } from "./hooks";
 import { time, usePlayer } from "./player";
@@ -108,18 +109,21 @@ export function TrackPage({ live = false }: { live?: boolean }) {
             Original instrumental <span>·</span> 2026 <span>·</span>{" "}
             {time(track.duration)}
           </p>
-          <button
-            className="song-play-button"
-            aria-label={`${isPlaying ? "Pause" : "Play"} ${track.title}`}
-            onClick={playTrack}
-          >
-            {isPlaying ? (
-              <Pause size={19} fill="currentColor" />
-            ) : (
-              <Play size={19} fill="currentColor" />
-            )}
-            {isPlaying ? "Pause song" : "Play song"}
-          </button>
+          <div className="song-actions">
+            <button
+              className="song-play-button"
+              aria-label={`${isPlaying ? "Pause" : "Play"} ${track.title}`}
+              onClick={playTrack}
+            >
+              {isPlaying ? (
+                <Pause size={19} fill="currentColor" />
+              ) : (
+                <Play size={19} fill="currentColor" />
+              )}
+              {isPlaying ? "Pause song" : "Play song"}
+            </button>
+            <SaveTrack track={track} />
+          </div>
           {isCurrent && (
             <span className="song-status">
               <Repeat2 size={14} />

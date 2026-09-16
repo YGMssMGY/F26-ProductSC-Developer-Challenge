@@ -2693,3 +2693,128 @@ input[type="range"] {
     padding: 20px 16px 14px;
   }
 }
+
+/* Song saving shares one state across every listening surface. */
+.save-track {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 36px;
+  padding: 4px;
+  flex-shrink: 0;
+  color: #b3b3b3;
+  border-radius: 50%;
+}
+.save-track:hover {
+  color: #fff;
+  transform: scale(1.06);
+}
+.save-track.is-saved {
+  color: var(--green);
+}
+.track-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+.track-head,
+.track-row {
+  grid-template-columns: 25px minmax(0, 1.8fr) minmax(80px, 1fr) 40px 64px;
+}
+.player-track-text {
+  flex: 1;
+}
+.song-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+}
+.song-actions .song-play-button {
+  margin-top: 0;
+}
+.liked-art,
+.library-entry .liked-art {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  margin: 0;
+  border-radius: 4px;
+  color: #fff;
+  background: linear-gradient(135deg, #512be7, #91bcb4);
+}
+.library-grid .library-entry .liked-art {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+.library-grid .liked-art svg {
+  width: 40%;
+  height: 40%;
+}
+.liked-library-card {
+  max-width: 400px;
+  margin: 24px 0;
+  background: #ffffff0a;
+  border-radius: 8px;
+}
+.liked-hero {
+  background: linear-gradient(#443389, #292044);
+}
+.liked-hero > .liked-art {
+  width: 190px;
+  height: 190px;
+  box-shadow: 0 8px 30px #0005;
+}
+.liked-songs-page .playlist-body {
+  padding-top: 20px;
+}
+.library-save-error {
+  position: fixed;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  max-width: calc(100vw - 32px);
+  padding: 16px;
+  border-radius: 8px;
+  background: #fff;
+  color: #151515;
+  box-shadow: 0 4px 20px #0008;
+}
+.library-save-error button {
+  margin-left: 12px;
+  text-decoration: underline;
+}
+@media (min-width: 1200px) {
+  .with-panel .track-head,
+  .with-panel .track-row {
+    grid-template-columns: 25px minmax(0, 1fr) 40px 64px;
+  }
+}
+@media (max-width: 1199px) {
+  .track-head,
+  .track-row,
+  .with-panel .track-head,
+  .with-panel .track-row {
+    grid-template-columns: 20px minmax(0, 1fr) 35px 64px;
+  }
+  .liked-hero > .liked-art {
+    width: 105px;
+    height: 105px;
+  }
+}
+@media (max-width: 699px) {
+  .liked-hero > .liked-art {
+    width: 130px;
+    height: 130px;
+    margin: 0 auto 22px;
+  }
+  .library-save-error {
+    bottom: 145px;
+  }
+}

@@ -22,6 +22,7 @@ import {
   Clock3,
   ArrowLeft,
   Music2,
+  Heart,
   Disc3,
   UserRound,
 } from "lucide-react";
@@ -43,6 +44,7 @@ import {
 import { ProfileMenu, SettingsPage } from "./profile-menu";
 import { Sidebar } from "./sidebar";
 import { HeaderSearch } from "./header-search";
+import { SaveTrack, LikedSongsLink } from "./save-track";
 import { TrackMenu } from "./track-menu";
 import "./styles.css";
 function Brand() {
@@ -275,7 +277,10 @@ function TrackList({
             {t.artist}
           </Link>
           <span className="duration">{time(t.duration)}</span>
-          <TrackMenu track={t} />
+          <div className="track-row-actions">
+            <SaveTrack track={t} />
+            <TrackMenu track={t} />
+          </div>
         </div>
       ))}
     </div>
@@ -619,9 +624,12 @@ function LibraryPage({ profile = false }: { profile?: boolean }) {
       ) : (
         <>
           <h1>Your Library</h1>
-          <p className="subtitle">Your playlists, all in one place.</p>
+          <p className="subtitle">Your saved music, all in one place.</p>
         </>
       )}
+      <div className="liked-library-card">
+        <LikedSongsLink />
+      </div>
       {libraryError && <p role="alert">{libraryError}</p>}
       {profile && <h2 className="profile-section-title">Saved playlists</h2>}
       {selected.length ? (
@@ -637,6 +645,83 @@ function LibraryPage({ profile = false }: { profile?: boolean }) {
         <h2>Find something to keep</h2>
         <Cards playlists={data.filter((p) => !saved.includes(p.id))} />
       </section>
+    </div>
+  );
+}
+function LikedSongsPage() {
+  const { liked } = useLibrary();
+  const player = usePlayer();
+  const { data, error, retry } = useAsync(
+    useCallback(() => catalog.listTracks(), []),
+  );
+  if (!data) return <State error={error} retry={retry} />;
+  const tracks = [...liked]
+    .reverse()
+    .map((id) => data.find((t) => t.id === id))
+    .filter((t): t is Track => !!t);
+  const active = player.queue.source?.kind === "liked";
+  return (
+    <div className="liked-songs-page">
+      <section className="playlist-hero liked-hero">
+        <div className="liked-art">
+          <Heart size={70} fill="currentColor" />
+        </div>
+        <div>
+          <p className="eyebrow">YOUR COLLECTION</p>
+          <h1>Liked Songs</h1>
+          <p>
+            {tracks.length} {tracks.length === 1 ? "song" : "songs"} · Saved on
+            this device
+          </p>
+        </div>
+      </section>
+      <div className="playlist-body">
+        {tracks.length ? (
+          <>
+            <div className="playlist-actions">
+              <button
+                className="big-play"
+                aria-label={
+                  active && player.playing
+                    ? "Pause Liked Songs"
+                    : "Play Liked Songs"
+                }
+                onClick={() =>
+                  active
+                    ? player.toggle()
+                    : player.start(tracks, 0, {
+                        kind: "liked",
+                        id: "liked",
+                        label: "Liked Songs",
+                      })
+                }
+              >
+                {active && player.playing ? (
+                  <Pause fill="currentColor" />
+                ) : (
+                  <Play fill="currentColor" />
+                )}
+              </button>
+            </div>
+            <TrackList
+              tracks={tracks}
+              source={{ kind: "liked", id: "liked", label: "Liked Songs" }}
+            />
+          </>
+        ) : (
+          <div className="state">
+            <Heart size={36} />
+            <h2>Songs you like belong here</h2>
+            <p>
+              Use the + button beside a song or choose Save to Liked Songs from
+              its menu.
+            </p>
+            <Link className="pill" to="/search">
+              Find songs
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -764,6 +849,7 @@ function Shell() {
             <Route path="/lyrics" element={<LyricsPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/collection/tracks" element={<LikedSongsPage />} />
             <Route path="/profile" element={<LibraryPage profile />} />
             <Route
               path="*"

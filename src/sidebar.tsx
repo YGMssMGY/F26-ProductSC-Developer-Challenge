@@ -14,6 +14,7 @@ import {
   Play,
   Pause,
 } from "lucide-react";
+import { LikedSongsLink } from "./save-track";
 import { catalog } from "./data";
 import { useAsync, useLibrary } from "./hooks";
 import { usePlayer } from "./player";
@@ -23,7 +24,7 @@ export function Sidebar() {
   const view = useView();
   const player = usePlayer();
   const location = useLocation();
-  const { saved, error: libraryError } = useLibrary();
+  const { saved, liked, error: libraryError } = useLibrary();
   const { data, error, retry } = useAsync(
     useCallback(() => catalog.listPlaylists(), []),
   );
@@ -308,6 +309,10 @@ export function Sidebar() {
         <div
           className={`library-items ${grid && !compact ? "library-grid" : ""}`}
         >
+          {liked.length > 0 &&
+            "liked songs".includes(query.trim().toLowerCase()) && (
+              <LikedSongsLink />
+            )}
           {error || libraryError ? (
             <div className="library-message" role="alert">
               <p>Couldn’t load your library.</p>
@@ -367,28 +372,37 @@ export function Sidebar() {
               );
             })
           )}
-          {data && !error && !playlists.length && !compact && (
-            <div className="library-message" role="status">
-              <Library size={28} />
-              <h3>
-                {query ? "No matches in Your Library" : "Make it your library"}
-              </h3>
-              <p>
-                {query
-                  ? `No saved playlists match “${query}”.`
-                  : "Save the playlists you love. Find them right here."}
-              </p>
-              {query ? (
-                <button className="pill" onClick={() => setQuery("")}>
-                  Clear search
-                </button>
-              ) : (
-                <Link className="pill" to="/?facet=music">
-                  Browse music
-                </Link>
-              )}
-            </div>
-          )}
+          {data &&
+            !error &&
+            !playlists.length &&
+            !compact &&
+            !(
+              liked.length > 0 &&
+              "liked songs".includes(query.trim().toLowerCase())
+            ) && (
+              <div className="library-message" role="status">
+                <Library size={28} />
+                <h3>
+                  {query
+                    ? "No matches in Your Library"
+                    : "Make it your library"}
+                </h3>
+                <p>
+                  {query
+                    ? `No saved playlists match “${query}”.`
+                    : "Save the playlists you love. Find them right here."}
+                </p>
+                {query ? (
+                  <button className="pill" onClick={() => setQuery("")}>
+                    Clear search
+                  </button>
+                ) : (
+                  <Link className="pill" to="/?facet=music">
+                    Browse music
+                  </Link>
+                )}
+              </div>
+            )}
         </div>
       </aside>
     </div>

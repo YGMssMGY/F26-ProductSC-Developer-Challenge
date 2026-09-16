@@ -1,7 +1,7 @@
 import type { Track } from "./data";
 export type RepeatMode = "queue" | "song" | "off";
 export type PlaybackSource = {
-  kind: "playlist" | "release" | "search" | "catalog" | "artist";
+  kind: "playlist" | "release" | "search" | "catalog" | "artist" | "liked";
   id: string;
   label: string;
 };
